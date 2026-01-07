@@ -124,16 +124,7 @@ export const getWeatherData = async (lon: number, lat: number): Promise<WeatherD
     const response = responses[0];
 
     // Attributes for timezone and location
-    const latitude = response.latitude();
-    const longitude = response.longitude();
-    const elevation = response.elevation();
     const utcOffsetSeconds = response.utcOffsetSeconds();
-
-    console.log(
-        `\nCoordinates: ${latitude}°N ${longitude}°E`,
-        `\nElevation: ${elevation}m asl`,
-        `\nTimezone difference to GMT+0: ${utcOffsetSeconds}s`
-    );
 
     const hourly = response.hourly()!;
     const daily = response.daily()!;

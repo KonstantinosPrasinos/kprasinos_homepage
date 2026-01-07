@@ -36,17 +36,15 @@
 		try {
 			loading = true;
 			const location = await getLocation();
+			
 			if (location) {
-				weatherData = await getWeatherData(location.coords.longitude, location.coords.latitude);
-
+				weatherData = await getWeatherData(location.longitude, location.latitude);
 				const now = new Date();
 				const hour = now.getUTCHours();
 
 				currentTemperature = weatherData?.hourly?.temperature_2m?.at(hour)?.toFixed(0) ?? '0';
 				description = getWeatherDescription(weatherData?.hourly?.weather_code?.[0] ?? 0);
-				locationData = await getCityName(location.coords.latitude, location.coords.longitude);
-
-				console.log(weatherData);
+				locationData = await getCityName(location.latitude, location.longitude);
 			} else {
 				error = 'Could not retrieve location.';
 			}

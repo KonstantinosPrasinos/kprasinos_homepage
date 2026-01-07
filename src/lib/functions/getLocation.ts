@@ -1,35 +1,44 @@
-export const getLocation = async () : Promise<GeolocationPosition> => {
+export type Location = {
+    longitude: number,
+    latitude: number
+}
+
+async function getIpLocation(): Promise<Location> {
+    const res = await fetch('https://ipapi.co/json/');
+    if (!res.ok) throw new Error('IP Fetch failed');
+
+    const data = await res.json();
+
+    return {
+        longitude: data.longitude,
+        latitude: data.latitude
+    }
+}
+
+export const getLocation = async (): Promise<Location> => {
     if (!navigator.geolocation) {
         throw new Error('Geolocation is not supported by this browser.');
     }
+
 
     // 2. Request the position
     return new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                resolve(position);
-            },
-            (err) => {
-                // Error handling
-                switch (err.code) {
-                    case err.PERMISSION_DENIED:
-                        throw new Error('User denied the request for Geolocation.');
-                        break;
-                    case err.POSITION_UNAVAILABLE:
-                        throw new Error('Location information is unavailable.');
-                        break;
-                    case err.TIMEOUT:
-                        throw new Error('The request to get user location timed out.');
-                        break;
-                    default:
-                        throw new Error('An unknown error occurred while retrieving location.');
-                        break;
+                const data: Location = {
+                    longitude: position.coords.longitude,
+                    latitude: position.coords.latitude,
                 }
-                reject(err);
+
+                resolve(data);
+            },
+            () => {
+                // Failed to fetch, attempting to get location by the ip
+                getIpLocation().then(resolve).catch(reject);
             },
             // Optional settings for high accuracy
             {
-                enableHighAccuracy: true, // Uses GPS if available
+                enableHighAccuracy: false, // Uses GPS if available
                 timeout: 5000, // Wait max 5 seconds
                 maximumAge: 0 // Do not use a cached position
             }
