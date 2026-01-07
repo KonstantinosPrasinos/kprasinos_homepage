@@ -87,7 +87,7 @@
 </script>
 
 <div class="search-wrapper">
-	<form on:submit|preventDefault={() => performSearch(query)} class="search-box">
+	<form on:submit|preventDefault={() => performSearch(query)} class="search-box glass">
 		<span class="icon">🔍</span>
 		<input
 			type="text"
@@ -102,7 +102,7 @@
 	</form>
 
 	{#if suggestions.length > 0}
-		<ul class="suggestions-list" bind:this={suggestionsList} class:visible={showSuggestionsList}>
+		<ul class="suggestions-list opaque-surface" bind:this={suggestionsList} class:visible={showSuggestionsList}>
 			{#each suggestions as item, index}
 				<li class:selected={index === selectedIndex} on:click={() => performSearch(item)}>
 					{item}
@@ -123,8 +123,6 @@
 	.search-box {
 		display: flex;
 		align-items: center;
-		background: rgb(from var(--surface-color) r g b / 0.4);
-		border: 1px solid var(--outline-color);
 		border-radius: 24px;
 		padding: 0 15px;
 		height: 46px;
@@ -158,16 +156,13 @@
 		top: 55px; /* Push it just below the bar */
 		left: 0;
 		right: 0;
-		background: var(--surface-color);
 		border-radius: 12px;
-		box-shadow: 0 4px 6px rgba(32, 33, 36, 0.28);
 		list-style: none;
 		padding: 6px 0;
 		margin: 0;
 		z-index: 10;
 		max-height: 200px;
 		overflow-y: auto;
-		border: 4px solid var(--surface-color);
 		transition: 0.2s ease-in opacity;
 		opacity: 1;
 	}

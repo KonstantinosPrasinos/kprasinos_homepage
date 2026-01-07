@@ -26,6 +26,7 @@
 
 		--background-color: #F9F8F4;
 		--surface-color: rgba(255, 252, 245, 0.5);
+		--opaque-surface-color: rgb(255, 252, 245);
 		--on-background-color: #45403C;
 		--on-surface-color: #2D2A26;
 		--outline-color: rgba(223, 225, 229, 0.3);
@@ -37,6 +38,12 @@
 	:global(.glass) {
 		backdrop-filter: blur(20px);
 		background-color: var(--surface-color);
+		box-shadow: 0 1px 12px rgba(0, 0, 0, 0.25);
+		border: 1px solid var(--outline-color);
+	}
+
+	:global(.opaque-surface) {
+		background-color: var(--opaque-surface-color);
 		box-shadow: 0 1px 12px rgba(0, 0, 0, 0.25);
 		border: 1px solid var(--outline-color);
 	}

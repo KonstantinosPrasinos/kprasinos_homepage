@@ -2,7 +2,7 @@
 	import Background from '$lib/components/Background.svelte';
 	import Clock from '$lib/components/Clock.svelte';
 	import SearchBar from '$lib/components/SearchBar.svelte';
-	import WeatherWidget from '$lib/components/WeatherWidget.svelte';
+	import WeeklyWeatherWidget from '$lib/components/WeeklyWeatherWidget.svelte';
 	import { onMount } from 'svelte';
 
 	type ThemeMode = 'light' | 'dark' | 'auto';
@@ -29,15 +29,15 @@
 </script>
 
 <div class="homepage">
+	<Background />
 	<div class="widgets side-widgets">
-		<WeatherWidget />
+		<WeeklyWeatherWidget />
 	</div>
-	<div class="widgets">
-		<Background />
+	<div class="widgets middle-widgets">
 		<Clock {showSeconds} />
 		<SearchBar />
 	</div>
-	<div class="widgets"></div>
+	<div class="widgets side-widgets"></div>
 </div>
 
 <style>
@@ -64,5 +64,12 @@
 	.side-widgets {
 		justify-content: flex-start;
 		padding: 20px;
+		width: 396px;
+	}
+
+	.middle-widgets {
+		justify-content: center;
+		gap: 40px;
+		flex-grow: 1;
 	}
 </style>
