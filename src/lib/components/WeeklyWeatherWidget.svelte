@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Question } from 'phosphor-svelte';
+	import { ArrowsClockwise, Question } from 'phosphor-svelte';
 	import { getLocation } from '$lib/functions/getLocation';
 	import {
 		getDayLetter,
@@ -11,6 +11,7 @@
 		type WeatherData
 	} from '$lib/functions/getWeatherData';
 	import { getCityName, type LocationData } from '$lib/functions/getCityName';
+	import LoadingIndicator from './LoadingIndicator.svelte';
 
 	let error: string | null = null;
 	let loading: boolean = true;
@@ -27,6 +28,8 @@
 
 	onMount(() => {
 		initialize();
+		const interval = setInterval(initialize, 30 * 60 * 1000); // Refresh every 30 minutes
+		return () => clearInterval(interval);
 	});
 
 	const initialize = async () => {
@@ -56,12 +59,15 @@
 	};
 </script>
 
-<div class="weather-container glass">
+<div class="weather-container glass widget" class:loading>
 	{#if loading}
-		<div>Loading...</div>
+		<LoadingIndicator />
 	{:else if error}
 		<div class="error">{error}</div>
 	{:else}
+		<button class="reload-button icon-button" title="Reload" on:click={initialize}>
+			<ArrowsClockwise size={24} />
+		</button>
 		<div class="column">
 			<div class="top-half">
 				<div class="location">{locationData.city}, {locationData.countryCode.toUpperCase()}</div>
@@ -111,14 +117,48 @@
 		display: flex;
 		flex-direction: row;
 		gap: 20px;
-		border-radius: 24px;
-		padding: 12px;
+		position: relative;
+	}
 
-		width: 320px;
-		height: 150px;
-		border-radius: 20px;
+	.reload-button {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		opacity: 0;
+		transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+		pointer-events: none;
+		background-color: var(--opaque-surface-color);
+		width: 32px;
+		height: 32px;
+		border-radius: 32px;
 
-		color: var(--on-surface-color);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		transform: scale(0.8);
+
+		padding: 4px;
+	}
+	.weather-container:hover .reload-button {
+		opacity: 1;
+		pointer-events: all;
+		transform: scale(1);
+	}
+
+	.weather-container.loading {
+		justify-content: center;
+		align-items: center;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: scale(0.8);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
 	}
 
 	.column {
@@ -126,6 +166,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
+		animation: 0.15s fadeIn ease-in-out;
 	}
 
 	.temperature {
@@ -158,9 +199,9 @@
 		height: 22px;
 	}
 
-    .row {
-        display: flex;
-        flex-direction: row;
-        gap: 6px;
-    }
+	.row {
+		display: flex;
+		flex-direction: row;
+		gap: 6px;
+	}
 </style>

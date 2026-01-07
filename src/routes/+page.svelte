@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Background from '$lib/components/Background.svelte';
 	import Clock from '$lib/components/Clock.svelte';
+	import FavoritesWidget from '$lib/components/FavoritesWidget.svelte';
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import WeeklyWeatherWidget from '$lib/components/WeeklyWeatherWidget.svelte';
 	import { onMount } from 'svelte';
@@ -32,6 +33,7 @@
 	<Background />
 	<div class="widgets side-widgets">
 		<WeeklyWeatherWidget />
+		<FavoritesWidget />
 	</div>
 	<div class="widgets middle-widgets">
 		<Clock {showSeconds} />
@@ -65,6 +67,7 @@
 		justify-content: flex-start;
 		padding: 20px;
 		width: 396px;
+		gap: 20px;
 	}
 
 	.middle-widgets {
