@@ -9,9 +9,7 @@
     };
 
 	// Settings
-	const positionInterval: number = 3000; // milliseconds
-    const maxCircles: number = 3;
-    const maxOverlapPercent: number = 0.3;
+	let randomRotation: number = 0;
 	const colors: string[] = [
 		'#1abc9c',
 		'#2ecc71',
@@ -35,74 +33,69 @@
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
-	const randomColor: string = colors[getRandomInt(0, colors.length - 1)];
-	const gradient: string = `radial-gradient(circle, ${randomColor} 0%, #000000 100%)`;
+	const generateBackground = () => {
+		const width = window.innerWidth;
+		const height = window.innerHeight;
 
-	let width: number = 0;
-	let height: number = 0;
-	let size: number = 0;
-	let x: number = 0;
-	let y: number = 0;
+		const circleRadius = (Math.sqrt(width * width + height * height)) / 2;
 
-    const populateCircles = () => {
-        for (const index in circles) {
-			circles[index].size = getRandomInt(200, 600);
-            circles[index].x = getRandomInt(-circles[index].size / 2, width - circles[index].size / 2);
-            circles[index].y = getRandomInt(-circles[index].size / 2, height - circles[index].size / 2);
-            circles[index].color = colors[getRandomInt(0, colors.length - 1)];
-			continue;
+		randomRotation = getRandomInt(0, 360);
 
-			let overlapping: boolean = false;
-            
-            do {
-				const tempX = getRandomInt(-circles[index].size / 2, width - circles[index].size / 2);
-				const tempY = getRandomInt(-circles[index].size / 2, height - circles[index].size / 2);
+		const circle1 = {
+			x: -circleRadius,
+			y: -circleRadius,
+			size: circleRadius * 2,
+			color: `radial-gradient(circle, ${colors[getRandomInt(0, colors.length - 1)]} 0%, var(--background-color) 100%)`
+		};
 
-				for (const otherIndex in circles) {
-					if (otherIndex === index) continue;
+		const circle2 = {
+			x: width - circleRadius,
+			y: -circleRadius,
+			size: circleRadius * 2,
+			color: `radial-gradient(circle, ${colors[getRandomInt(0, colors.length - 1)]} 0%, var(--background-color) 100%)`
+		};
 
-					const dx = tempX + circles[index].size / 2 - (circles[otherIndex].x + circles[otherIndex].size / 2);
-					const dy = tempY + circles[index].size / 2 - (circles[otherIndex].y + circles[otherIndex].size / 2);
-					const distance = Math.sqrt(dx * dx + dy * dy);
+		const circle3 = {
+			x: width / 2 - circleRadius,
+			y: height / 2,
+			size: circleRadius * 2,
+			color: `radial-gradient(circle, ${colors[getRandomInt(0, colors.length - 1)]} 0%, var(--background-color) 100%)`
+		};
 
-					if ((distance < (circles[index].size / 2) * (1 - maxOverlapPercent)) && (distance < (circles[otherIndex].size / 2) * (1 - maxOverlapPercent))) {
-						overlapping = true;
-					} else {
-						overlapping = false;
-						circles[index].x = tempX;
-						circles[index].y = tempY;
-					}
-				}
-            } while (overlapping)
-        }
-    }
+		circles = [circle1, circle2, circle3];
+	}
+
+	const handleResize = () => {
+		const width = window.innerWidth;
+		const height = window.innerHeight;
+
+		const circleRadius = (Math.sqrt(width * width + height * height)) / 2;
+
+		circles[0].x = -circleRadius;
+		circles[0].y = -circleRadius;
+		circles[0].size = circleRadius * 2;
+		
+		circles[1].x = width - circleRadius;
+		circles[1].y = -circleRadius;
+		circles[1].size = circleRadius * 2;
+
+		circles[2].x = width / 2 - circleRadius;
+		circles[2].y = height / 2;
+		circles[2].size = circleRadius * 2;
+	};
 
 	onMount(() => {
-		width = window.innerWidth;
-		height = window.innerHeight;
-
-        circles = Array.from({ length: maxCircles }, () => {
-            return {
-                size: 0,
-                x: width / 2,
-                y: height / 2,
-                color: colors[0]
-            };
-        });
-
-		// const interval = setInterval(populateCircles, positionInterval);
-
-		populateCircles(); // Initial population
-
-		// return () => clearInterval(interval);
+		generateBackground();
 	});
 </script>
 
-<div class="background">
+<svelte:window on:resize={handleResize} />
+
+<div class="background" style={`transform: rotate(${randomRotation.toString()}deg)`}>
 	{#each circles as circle}
 		<div
 			class="circle"
-			style={`background-color: ${circle.color}; width: ${circle.size}px; height: ${circle.size}px; position: absolute; top: ${circle.y}px; left: ${circle.x}px; border-radius: 50%; transition-duration: ${positionInterval * 2}ms;`}
+			style={`background: ${circle.color}; width: ${circle.size}px; height: ${circle.size}px; top: ${circle.y}px; left: ${circle.x}px;`}
 		></div>
 	{/each}
 </div>
@@ -119,10 +112,11 @@
 	}
 	.circle {
         transition-timing-function: linear;
-		transition: top, left, width, height, background-color;
         top: 50%;
         left: 50%;
         height: 0;
         width: 0;
+		border-radius: 50%;
+		position: absolute;
 	}
 </style>

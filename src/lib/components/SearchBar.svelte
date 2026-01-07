@@ -123,9 +123,8 @@
 	.search-box {
 		display: flex;
 		align-items: center;
-		background: rgb(from var(--surface-color) r g b / 0.8);
-		opacity: 0.8;
-		border: 1px solid #dfe1e5;
+		background: rgb(from var(--surface-color) r g b / 0.4);
+		border: 1px solid var(--outline-color);
 		border-radius: 24px;
 		padding: 0 15px;
 		height: 46px;

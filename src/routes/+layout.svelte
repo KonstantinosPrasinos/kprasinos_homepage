@@ -25,11 +25,19 @@
 		margin: 0;
 
 		--background-color: #F9F8F4;
-		--surface-color: #FFFCF5;
+		--surface-color: rgba(255, 252, 245, 0.5);
 		--on-background-color: #45403C;
 		--on-surface-color: #2D2A26;
-		
+		--outline-color: rgba(223, 225, 229, 0.3);
+
 		background-color: var(--background-color);
 		color: var(--on-background-color)
+	}
+
+	:global(.glass) {
+		backdrop-filter: blur(20px);
+		background-color: var(--surface-color);
+		box-shadow: 0 1px 12px rgba(0, 0, 0, 0.25);
+		border: 1px solid var(--outline-color);
 	}
 </style>

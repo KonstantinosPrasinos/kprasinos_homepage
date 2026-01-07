@@ -2,6 +2,7 @@
 	import Background from '$lib/components/Background.svelte';
 	import Clock from '$lib/components/Clock.svelte';
 	import SearchBar from '$lib/components/SearchBar.svelte';
+	import WeatherWidget from '$lib/components/WeatherWidget.svelte';
 	import { onMount } from 'svelte';
 
 	type ThemeMode = 'light' | 'dark' | 'auto';
@@ -27,14 +28,30 @@
 	});
 </script>
 
-<div class="center-widgets">
-	<Background />
-	<Clock {showSeconds} />
-	<SearchBar />
+<div class="homepage">
+	<div class="widgets side-widgets">
+		<WeatherWidget />
+	</div>
+	<div class="widgets">
+		<Background />
+		<Clock {showSeconds} />
+		<SearchBar />
+	</div>
+	<div class="widgets"></div>
 </div>
 
 <style>
-	.center-widgets {
+	.homepage {
+		position: relative;
+		width: 100vw;
+		height: 100vh;
+		overflow: hidden;
+
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.widgets {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -44,15 +61,8 @@
 		box-sizing: border-box;
 	}
 
-	.circle {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 150vh;
-		height: 150vh;
-		background: radial-gradient(circle, #4facfe 0%, #00f2fe 100%);
-		border-radius: 50%;
-		transform: translate(-50%, -50%);
-		animation: pulse 10s infinite alternate;
+	.side-widgets {
+		justify-content: flex-start;
+		padding: 20px;
 	}
 </style>
