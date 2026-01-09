@@ -7,12 +7,13 @@
 </script>
 
 <script lang="ts">
-	import { Pencil, Plus, Trash } from 'phosphor-svelte';
+	import { Pencil, PencilSlash, Plus, Trash } from 'phosphor-svelte';
 	import AddFavoriteModal from './AddFavoriteModal.svelte';
 	import { onMount } from 'svelte';
 
 	let favorites: Favorite[] = [];
 	let modal: AddFavoriteModal;
+	let isEditMode: boolean = false;
 
 	onMount(() => {
 		// Load favorites from localStorage if available
@@ -36,25 +37,62 @@
 			addFavorite(favorite);
 		}
 	}
+
+	const toggleEditMode = () => {
+		isEditMode = !isEditMode;
+	}
+
+    const deleteFavorite = (favorite: Favorite) => {
+        favorites = favorites.filter((f) => f !== favorite);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
 </script>
 
 <div class="favorites-widget glass widget">
 	<div class="widget-title-bar">
 		<div>Favorites:</div>
-		<button
-			title="Add favorite"
-			class="add-favorite-button icon-button"
-			on:click={handleAddFavorite}
-		>
-			<Plus size={22} />
-		</button>
+		<div class="row">
+			<button
+				title="Add favorite"
+				class="small-icon-button icon-button"
+				on:click={handleAddFavorite}
+			>
+				<Plus size={22} />
+			</button>
+			<button
+				title="Edit favorites"
+				class="small-icon-button icon-button"
+				on:click={toggleEditMode}
+			>
+				{#if isEditMode}
+					<PencilSlash size={22} />
+				{:else}
+					<Pencil size={22} />
+				{/if}
+			</button>
+		</div>
 	</div>
 	<div class="favorites-list">
 		{#each favorites as favorite}
-			<a href={favorite.url} class="favorite-item" target="_blank" rel="noopener noreferrer">
-				<img src={favorite.faviconUrl} alt="Favicon of {favorite.title}" class="favorite-favicon" />
-				<span class="favorite-title">{favorite.title}</span>
-			</a>
+			<div class="favorite-item-container">
+                {#if isEditMode}
+                    <button
+                        title="Delete favorite"
+                        class="edit-item-button icon-button"
+                        on:click={() => deleteFavorite(favorite)}
+                    >
+                        <Trash size={28} />
+                    </button>
+                {/if}
+				<a href={favorite.url} class="favorite-item" target="_blank" rel="noopener noreferrer">
+					<img
+						src={favorite.faviconUrl}
+						alt="Favicon of {favorite.title}"
+						class="favorite-favicon"
+					/>
+					<span class="favorite-title">{favorite.title}</span>
+				</a>
+			</div>
 		{/each}
 	</div>
 </div>
@@ -75,7 +113,7 @@
 		font-weight: 600;
 	}
 
-	.add-favorite-button {
+	.small-icon-button {
 		width: 22px;
 		height: 22px;
 	}
@@ -115,12 +153,18 @@
 			border-color 0.05s ease-in-out,
 			background-color 0.05s ease-in-out;
 		cursor: pointer;
+        width: 100%;
+        height: 100%;
 	}
 
 	.favorite-item:hover {
 		border-color: var(--outline-color);
 		background-color: var(--opaque-surface-color);
 	}
+
+    .favorite-item img {
+        transition: transform 0.1s ease-in-out;
+    }
 
 	.favorite-favicon {
 		width: 36px;
@@ -135,4 +179,43 @@
 		text-overflow: ellipsis;
 		max-width: 100%;
 	}
+
+	.row {
+		display: flex;
+		gap: 8px;
+	}
+
+    .favorite-item-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .favorite-item-container:has(.edit-item-button) .favorite-item {
+        pointer-events: none;
+    }
+
+    .favorite-item-container:has(.edit-item-button) .favorite-item img {
+        transform: scale(0.8);
+    }
+
+    .edit-item-button {
+        position: absolute;
+        width: 36px;
+        height: 36px;
+        background-color: white;
+        color: var(--on-surface-color);
+        border-radius: 50%;
+        top: 0;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        animation: fadeIn 0.1s ease-in-out;
+        z-index: 2;
+    }
 </style>
