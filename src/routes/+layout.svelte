@@ -1,5 +1,6 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
+	import { settings } from '$lib/store/stores';
 
 	let { children } = $props();
 </script>
@@ -33,6 +34,19 @@
 
 		background-color: var(--background-color);
 		color: var(--on-background-color);
+	}
+
+	:global(*) {
+		transition: background-color 0.2s ease-out, color 0.2s ease-out;
+	}
+
+	:global(.dark) {
+		--background-color: #181614;
+		--surface-color: rgba(40, 38, 35, 0.6);
+		--opaque-surface-color: rgb(40, 38, 35);
+		--on-background-color: #a8a29e; 
+		--on-surface-color: #e7e5e4; 
+		--outline-color: rgba(255, 255, 255, 0.1);
 	}
 
 	:global(h3) {

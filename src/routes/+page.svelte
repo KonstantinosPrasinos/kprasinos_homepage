@@ -2,8 +2,10 @@
 	import Background from '$lib/components/Background.svelte';
 	import Clock from '$lib/components/Clock.svelte';
 	import FavoritesWidget from '$lib/components/FavoritesWidget.svelte';
+	import QuickSettings from '$lib/components/QuickSettings.svelte';
 	import SearchBar from '$lib/components/SearchBar.svelte';
 	import WeeklyWeatherWidget from '$lib/components/WeeklyWeatherWidget.svelte';
+	import { settings } from '$lib/store/stores';
 	import { onMount } from 'svelte';
 
 	type ThemeMode = 'light' | 'dark' | 'auto';
@@ -29,7 +31,7 @@
 	});
 </script>
 
-<div class="homepage">
+<div class="homepage" class:dark={$settings.isLightMode}>
 	<Background />
 	<div class="widgets side-widgets">
 		<WeeklyWeatherWidget />
@@ -39,7 +41,9 @@
 		<Clock {showSeconds} />
 		<SearchBar />
 	</div>
-	<div class="widgets side-widgets"></div>
+	<div class="widgets side-widgets">
+		<QuickSettings />
+	</div>
 </div>
 
 <style>

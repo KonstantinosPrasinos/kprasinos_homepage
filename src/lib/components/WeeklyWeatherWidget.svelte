@@ -12,11 +12,12 @@
 	} from '$lib/functions/getWeatherData';
 	import { getCityName, type LocationData } from '$lib/functions/getCityName';
 	import LoadingIndicator from './LoadingIndicator.svelte';
+	import { settings } from '$lib/store/stores';
 
 	let error: string | null = null;
 	let loading: boolean = true;
 	let description: string = 'Unknown';
-	let currentTemperature: String = '0';
+	let currentTemperature: string = '0';
 	let locationData: LocationData = {
 		city: 'Unknown Location',
 		country: 'Unknown Country',
@@ -25,6 +26,8 @@
 	let weatherData: WeatherData | null = null;
 
 	$: IconComponent = weatherIconMap[description] || Question;
+
+	$: localizedTemperature = getLocalizedTemperature(currentTemperature, $settings.isNormal)
 
 	onMount(() => {
 		initialize();
@@ -55,6 +58,12 @@
 			loading = false;
 		}
 	};
+
+	const getLocalizedTemperature = (temperature: string, isNormal: Boolean) : string => {
+		const temperatureNumber = Number.parseInt(temperature)
+		if (isNormal) return temperatureNumber.toFixed(0)
+		return 	((temperatureNumber * 9/5) + 32).toFixed(0);
+	}
 </script>
 
 <div class="weather-container glass widget" class:loading>
@@ -69,7 +78,7 @@
 		<div class="column">
 			<div class="top-half">
 				<div class="location">{locationData.city}, {locationData.countryCode.toUpperCase()}</div>
-				<div class="temperature">{currentTemperature}°C</div>
+				<div class="temperature">{localizedTemperature}°{$settings.isNormal ? "C" : "F"}</div>
 			</div>
 			<div class="bottom-half">
 				<div class="weather-icon">

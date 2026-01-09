@@ -66,7 +66,7 @@
     });
 </script>
 
-<svelte:window on:resize={draw} />
+<svelte:window />
 
 <canvas 
     bind:this={canvas}
