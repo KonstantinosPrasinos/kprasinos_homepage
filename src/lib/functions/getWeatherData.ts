@@ -5,13 +5,13 @@ import type { Component } from "svelte";
 export type WeatherData = {
     hourly: {
         time: Date[];
-        temperature_2m: Float32Array<ArrayBufferLike>;
+        temperature_2m: Float32Array<ArrayBufferLike> | Array<number>;
         weather_code: Float32Array<ArrayBufferLike>;
     };
     daily: {
         time: Date[];
-        apparent_temperature_max: Float32Array<ArrayBufferLike>;
-        apparent_temperature_min: Float32Array<ArrayBufferLike>;
+        apparent_temperature_max: Float32Array<ArrayBufferLike> | Array<number>;
+        apparent_temperature_min: Float32Array<ArrayBufferLike> | Array<number>;
         weather_code: Float32Array<ArrayBufferLike>;
     };
     today: {
@@ -115,7 +115,8 @@ export const getWeatherData = async (lon: number, lat: number): Promise<WeatherD
         latitude: lat,
         longitude: lon,
         daily: ['apparent_temperature_max', 'apparent_temperature_min', 'weather_code'],
-        hourly: ['temperature_2m', 'weather_code']
+        hourly: ['temperature_2m', 'weather_code'],
+        timezone: 'auto'
     };
     const url = 'https://api.open-meteo.com/v1/forecast';
     const responses = await fetchWeatherApi(url, params);
@@ -151,10 +152,20 @@ export const getWeatherData = async (lon: number, lat: number): Promise<WeatherD
             weather_code: daily.variables(2)!.valuesArray()!
         },
         today: {
-            maxTemp: daily.variables(0)!.valuesArray()![0],
-            minTemp: daily.variables(1)!.valuesArray()![0]
+            maxTemp: -1000,
+            minTemp: 1000
         }
     };
+
+    for (let i = 0; i < 24; i++) {
+        if (weatherData.hourly.temperature_2m[i] < weatherData.today.minTemp) {
+            weatherData.today.minTemp = weatherData.hourly.temperature_2m[i]
+        }
+
+        if (weatherData.hourly.temperature_2m[i] > weatherData.today.maxTemp) {
+            weatherData.today.maxTemp = weatherData.hourly.temperature_2m[i]
+        }
+    }
 
     return weatherData;
 };

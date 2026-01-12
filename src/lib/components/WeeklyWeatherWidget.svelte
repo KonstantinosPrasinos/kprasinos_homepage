@@ -25,9 +25,37 @@
 	};
 	let weatherData: WeatherData | null = null;
 
+	let localizedWeatherData: WeatherData | null = null;
+
 	$: IconComponent = weatherIconMap[description] || Question;
 
+	$: temperatureSymbol = $settings.isNormal ? "C" : "F"
+
 	$: localizedTemperature = getLocalizedTemperature(currentTemperature, $settings.isNormal)
+
+	$: ($settings, localizeWeatherData())
+
+	const localizeWeatherData = () => {
+		if (weatherData === null) return;
+
+		const isNormal = $settings.isNormal
+
+		if ($settings.isNormal) {
+			localizedWeatherData = weatherData
+		} else {
+			localizedWeatherData = JSON.parse(JSON.stringify(weatherData));
+			if (localizedWeatherData) {
+				localizedWeatherData.today.maxTemp = getLocalizedTemperatureNumber(localizedWeatherData.today.maxTemp, isNormal)
+				localizedWeatherData.today.minTemp = getLocalizedTemperatureNumber(localizedWeatherData.today.minTemp, isNormal)
+
+				// localizedWeatherData.hourly.temperature_2m = Object.values(localizedWeatherData.hourly.temperature_2m).map(temperature => getLocalizedTemperatureNumber(temperature, isNormal))
+				localizedWeatherData.daily.apparent_temperature_max = Object.values(localizedWeatherData.daily.apparent_temperature_max).map(temperature => getLocalizedTemperatureNumber(temperature, isNormal))
+				localizedWeatherData.daily.apparent_temperature_min = Object.values(localizedWeatherData.daily.apparent_temperature_min).map(temperature => getLocalizedTemperatureNumber(temperature, isNormal))
+			}
+		}
+
+		localizedTemperature = getLocalizedTemperature(currentTemperature, isNormal)
+	}
 
 	onMount(() => {
 		initialize();
@@ -48,6 +76,8 @@
 				currentTemperature = weatherData?.hourly?.temperature_2m?.at(hour)?.toFixed(0) ?? '0';
 				description = getWeatherDescription(weatherData?.hourly?.weather_code?.[0] ?? 0);
 				locationData = await getCityName(location.latitude, location.longitude);
+
+				localizeWeatherData()
 			} else {
 				error = 'Could not retrieve location.';
 			}
@@ -64,6 +94,11 @@
 		if (isNormal) return temperatureNumber.toFixed(0)
 		return 	((temperatureNumber * 9/5) + 32).toFixed(0);
 	}
+
+	const getLocalizedTemperatureNumber = (temperature: number, isNormal: Boolean) : number => {
+		if (isNormal) return temperature
+		return (temperature * 9/5) + 32;
+	}
 </script>
 
 <div class="weather-container glass widget" class:loading>
@@ -78,36 +113,36 @@
 		<div class="column">
 			<div class="top-half">
 				<div class="location">{locationData.city}, {locationData.countryCode.toUpperCase()}</div>
-				<div class="temperature">{localizedTemperature}°{$settings.isNormal ? "C" : "F"}</div>
+				<div class="temperature">{localizedTemperature}°{temperatureSymbol}</div>
 			</div>
 			<div class="bottom-half">
 				<div class="weather-icon">
 					<svelte:component this={IconComponent} size={32} weight="regular" />
 				</div>
 				<div class="column bottom-info">
-					<div class="temperatureRange">H: {weatherData?.today.maxTemp.toFixed(0) ?? 'N/A'}°C</div>
-					<div class="temperatureRange">L: {weatherData?.today.minTemp.toFixed(0) ?? 'N/A'}°C</div>
+					<div class="temperatureRange">H: {localizedWeatherData?.today.maxTemp.toFixed(0) ?? 'N/A'}°{temperatureSymbol}</div>
+					<div class="temperatureRange">L: {localizedWeatherData?.today.minTemp.toFixed(0) ?? 'N/A'}°{temperatureSymbol}</div>
 				</div>
 			</div>
 		</div>
 		<div class="column">
-			{#each weatherData?.daily?.time.slice(1).slice(0, -1) as day, i}
+			{#each localizedWeatherData?.daily?.time.slice(1).slice(0, -1) as day, i}
 				<div class="bottom-half">
 					<div class="day">{getDayLetter(new Date(day))}:</div>
 					<div class="column bottom-info">
 						<div class="row">
 							<div class="temperatureRange small">
-								{weatherData?.daily?.apparent_temperature_min?.[i + 1]?.toFixed(0) ?? '--'}°C
+								{localizedWeatherData?.daily?.apparent_temperature_min?.[i + 1]?.toFixed(0) ?? '--'}°{temperatureSymbol}
 							</div>
 							<div class="temperatureRange small">
-								{weatherData?.daily?.apparent_temperature_max?.[i + 1]?.toFixed(0) ?? '--'}°C
+								{localizedWeatherData?.daily?.apparent_temperature_max?.[i + 1]?.toFixed(0) ?? '--'}°{temperatureSymbol}
 							</div>
 						</div>
 					</div>
 					<div class="weather-icon small">
 						<svelte:component
 							this={getWeatherIcon(
-								getWeatherDescription(weatherData?.daily?.weather_code?.[i + 1] ?? 0)
+								getWeatherDescription(localizedWeatherData?.daily?.weather_code?.[i + 1] ?? 0)
 							)}
 							size={22}
 							weight="regular"

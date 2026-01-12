@@ -1,87 +1,142 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+	import { settings } from '$lib/store/stores';
+	import { onMount } from 'svelte';
 
-    let canvas: HTMLCanvasElement;
+	let canvas: HTMLCanvasElement;
+	let prevThemeWasLight: Boolean = true;
 
-    const colors: string[] = [
-        '#1abc9c', '#2ecc71', '#3498db', '#9b59b6', '#16a085', 
-        '#27ae60', '#2980b9', '#8e44ad', '#f1c40f', '#e67e22', 
-        '#e74c3c', '#f39c12', '#d35400', '#c0392b'
-    ];
+	const colors: string[] = [
+		'#1abc9c',
+		'#2ecc71',
+		'#3498db',
+		'#9b59b6',
+		'#16a085',
+		'#27ae60',
+		'#2980b9',
+		'#8e44ad',
+		'#f1c40f',
+		'#e67e22',
+		'#e74c3c',
+		'#f39c12',
+		'#d35400',
+		'#c0392b'
+	];
 
-    function getRandomInt(min: number, max: number): number {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+	const darkColors: string[] = [
+		'#48C9B0', // Soft Turquoise
+		'#58D68D', // Soft Emerald
+		'#5DADE2', // Soft Blue
+		'#A569BD', // Soft Purple
+		'#45B39D', // Muted Teal
+		'#52BE80', // Muted Green
+		'#5499C7', // Muted Blue
+		'#AF7AC5', // Muted Violet
+		'#F4D03F', // Soft Yellow (Moonlight)
+		'#EB984E', // Soft Orange
+		'#EC7063', // Soft Red
+		'#F5B041', // Muted Gold
+		'#DC7633', // Muted Bronze
+		'#E74C3C' // Muted Terra Cotta
+	];
 
-    function getCssVar(name: string) {
-        return getComputedStyle(document.body).getPropertyValue(name).trim() || 'transparent';
-    }
+	function getRandomInt(min: number, max: number): number {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
 
-    const draw = () => {
-        if (!canvas) return;
+	function getCssVar(name: string) {
+		const elements = document.getElementsByClassName('homepage');
 
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+		if (elements.length === 0) return 'transparent';
 
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+		return getComputedStyle(elements[0]).getPropertyValue(name).trim() || 'transparent';
+	}
 
-        canvas.width = width;
-        canvas.height = height;
+	const draw = () => {
+		if (!canvas) return;
 
-        ctx.clearRect(0, 0, width, height);
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
 
-        const circleRadius = (Math.sqrt(width * width + height * height)) / 2;
-        const bgColor = getCssVar('--background-color');
+		const width = window.innerWidth;
+		const height = window.innerHeight;
 
-        const circles = [
-            { x: 0, y: 0 },                    // Top-Left
-            { x: width, y: 0 },                // Top-Right
-            { x: width / 2, y: height }    // Center
-        ];
+		canvas.width = width;
+		canvas.height = height;
 
-        circles.forEach(circle => {
-            const color = colors[getRandomInt(0, colors.length - 1)];
+		ctx.clearRect(0, 0, width, height);
 
-            
-            const g = ctx.createRadialGradient(
-                circle.x, circle.y, 0,
-                circle.x, circle.y, circleRadius 
-            );
+		const circleRadius = Math.sqrt(width * width + height * height) / 2;
+		const bgColor = getCssVar('--background-color');
 
-            g.addColorStop(0, color);
-            g.addColorStop(1, bgColor); // Fade into background color
+		ctx.fillStyle = bgColor;
+		ctx.fillRect(0, 0, width, height);
 
-            ctx.fillStyle = g;
-            
-            // Move to the position and draw
-            ctx.beginPath();
-            ctx.arc(circle.x, circle.y, circleRadius, 0, Math.PI * 2);
-            ctx.fill();
-        });
-    };
+		const circles = [
+			{ x: 0, y: 0 }, // Top-Left
+			{ x: width, y: 0 }, // Top-Right
+			{ x: width / 2, y: height * 1.5 } // Center
+		];
 
-    onMount(() => {
-        requestAnimationFrame(draw);
-    });
+		circles.forEach((circle) => {
+			let color;
+
+			if ($settings.isLightMode) {
+				color = colors[getRandomInt(0, colors.length - 1)];
+			} else {
+				color = darkColors[getRandomInt(0, colors.length - 1)];
+			}
+			
+
+			const g = ctx.createRadialGradient(circle.x, circle.y, 0, circle.x, circle.y, circleRadius);
+
+			g.addColorStop(0, color);
+			g.addColorStop(1, bgColor); // Fade into background color
+
+			ctx.fillStyle = g;
+
+			// Move to the position and draw
+			ctx.beginPath();
+			ctx.arc(circle.x, circle.y, circleRadius, 0, Math.PI * 2);
+			ctx.fill();
+		});
+	};
+
+	const handleThemeUpdate = () => {
+		if (prevThemeWasLight !== $settings.isLightMode) {
+			prevThemeWasLight = $settings.isLightMode
+			setTimeout(draw, 10);
+		}
+	};
+
+	$: ($settings, handleThemeUpdate());
+
+	onMount(() => {
+		requestAnimationFrame(draw);
+	});
 </script>
 
-<svelte:window />
-
-<canvas 
-    bind:this={canvas}
-></canvas>
+<div>
+	<div class="background-blur"></div>
+	<canvas bind:this={canvas}></canvas>
+</div>
 
 <style>
-    canvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-		filter: blur(100px);
-        z-index: -1;
-        /* Blur is still needed to smooth the gradients, but it's faster on one element */
-        /* filter: blur(50px);  */
-    }
+	.background-blur {
+		position: absolute;
+		top: -50px;
+		left: -50px;
+		width: calc(100% + 100px);
+		height: calc(100% + 100px);
+		z-index: -1;
+		backdrop-filter: blur(100px);
+	}
+
+	canvas {
+		position: absolute;
+		top: -50px;
+		left: -50px;
+		width: calc(100% + 100px);
+		height: calc(100% + 100px);
+		z-index: -2;
+	}
 </style>

@@ -206,7 +206,7 @@
         position: absolute;
         width: 36px;
         height: 36px;
-        background-color: white;
+        background-color: var(--opaque-surface-color);
         color: var(--on-surface-color);
         border-radius: 50%;
         top: 0;
@@ -217,5 +217,7 @@
 
         animation: fadeIn 0.1s ease-in-out;
         z-index: 2;
+
+        color: var(--on-surface-color);
     }
 </style>
